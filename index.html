@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="google-site-verification" content="5EchCsH88JXnn0Mc55I8joYV6mial9rsc4G8c0eg4Ls" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DigitVision — AI Handwritten Digit Classifier</title>
+<meta name="description" content="DigitVision is a machine-learning handwritten digit recognizer. Draw a digit 0–9 and a real softmax (logistic regression) model, trained in Python on 1,797 digit images and running fully in your browser, predicts what you drew.">
+<link rel="canonical" href="https://digitvision.vercel.app/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="DigitVision — AI Handwritten Digit Classifier">
+<meta property="og:description" content="Draw a digit 0–9, get an instant prediction from a real trained ML model running in your browser.">
+<meta property="og:url" content="https://digitvision.vercel.app/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="DigitVision — AI Handwritten Digit Classifier">
+<meta name="twitter:description" content="Real softmax digit classifier (97% CV accuracy), running 100% in the browser.">
+<meta name="robots" content="index, follow">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication",
+"name":"DigitVision","applicationCategory":"EducationalApplication",
+"operatingSystem":"Web","description":"Machine-learning handwritten digit classifier, running entirely in the browser.",
+"author":{"@type":"Person","name":"Vikranth Reddy"}}
+</script>
+<style>
+  :root { --ink:#111; --muted:#555; --line:#e5e5e5; --bg:#ffffff; --card:#fafafa; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+         color:var(--ink); background:var(--bg); margin:0; line-height:1.6; }
+  .wrap { max-width:760px; margin:0 auto; padding:32px 20px 64px; }
+  header { border-bottom:2px solid var(--ink); padding-bottom:16px; margin-bottom:28px; }
+  h1 { font-size:2rem; margin:0 0 4px; letter-spacing:-0.5px; }
+  .tag { color:var(--muted); margin:0; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:20px; margin:18px 0; }
+  .demorow { display:flex; gap:18px; align-items:flex-start; flex-wrap:wrap; }
+  #pad { background:#000; border-radius:8px; touch-action:none; cursor:crosshair; }
+  .side { flex:1; min-width:220px; }
+  button { background:var(--ink); color:#fff; border:0; border-radius:8px; padding:12px 26px;
+           font-size:1rem; cursor:pointer; margin-top:12px; }
+  button:hover { background:#333; }
+  button.ghost { background:#fff; color:var(--ink); border:1px solid var(--line);
+                 padding:8px 14px; font-size:.9rem; margin:6px 6px 0 0; }
+  #verdict { font-size:1.6rem; font-weight:700; margin:6px 0; }
+  .prow { display:flex; align-items:center; gap:8px; margin:5px 0; font-size:.92rem; }
+  .prow .d { width:16px; font-weight:700; }
+  .prow .barw { flex:1; height:12px; background:#eee; border-radius:6px; overflow:hidden; }
+  .prow .fill { height:100%; width:0%; background:var(--ink); transition:width .3s; }
+  .prow .p { width:52px; text-align:right; color:var(--muted); }
+  .samples { margin-top:10px; font-size:.9rem; color:var(--muted); }
+  #preview { image-rendering:pixelated; border:1px solid var(--line); border-radius:4px; margin-top:10px; }
+  .hint { font-size:.85rem; color:var(--muted); margin-top:8px; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media (max-width:600px){ .grid{grid-template-columns:1fr;} }
+  h2 { font-size:1.3rem; margin:28px 0 8px; }
+  code { background:#f0f0f0; padding:2px 6px; border-radius:4px; font-size:.9em; }
+  footer { border-top:1px solid var(--line); margin-top:40px; padding-top:16px;
+           color:var(--muted); font-size:.9rem; }
+  a { color:var(--ink); }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>DigitVision ✍️</h1>
+  <p class="tag">AI handwritten digit classifier — by Vikranth Reddy</p>
+</header>
+
+<section class="card">
+  <h2 style="margin-top:0">Try the live model</h2>
+  <p>Draw a digit (0–9) in the box. A real <b>softmax (multinomial logistic regression)</b> model — trained in Python on 1,797 digit images, exported as weights, running 100% in your browser — predicts what you drew.</p>
+  <div class="demorow">
+    <div>
+      <canvas id="pad" width="280" height="280"></canvas>
+      <div>
+        <button id="go">Classify</button>
+        <button class="ghost" id="clear">Clear</button>
+      </div>
+    </div>
+    <div class="side">
+      <div id="verdict">Draw a digit, then hit Classify.</div>
+      <div id="probs"></div>
+      <canvas id="preview" width="80" height="80" title="What the model sees (8x8)"></canvas>
+      <div class="hint">The 8×8 image above is what the model actually sees.</div>
+    </div>
+  </div>
+  <div class="samples">Or load a real sample digit from the training set:
+    <span id="samplebtns"></span>
+  </div>
+</section>
+
+<section>
+  <h2>How it works</h2>
+  <div class="grid">
+    <div class="card"><b>1. Data</b><br>1,797 handwritten 8×8 grayscale digit images (0–9), pixel values scaled to 0–1.</div>
+    <div class="card"><b>2. Model</b><br>Softmax regression (multinomial logistic regression, scikit-learn). It learns one 64-pixel weight map per digit plus a bias — the weights literally look like the digits. 5-fold CV accuracy: <b>97.0%</b>.</div>
+    <div class="card"><b>3. Browser</b><br><code>weights.json</code> (10 weight vectors + 10 biases + sample digits) is shipped to the site; JavaScript downsamples your drawing to 8×8 and re-runs the exact same softmax math as sklearn's <code>predict_proba</code>.</div>
+    <div class="card"><b>4. Explainable</b><br>The prediction is just a weighted vote of pixels — no black box. Draw messily and watch the probability spread.</div>
+  </div>
+  <h2>Tech stack</h2>
+  <p>Python · scikit-learn · NumPy · vanilla JavaScript (canvas) · static hosting (Vercel)</p>
+  <h2>Files in this repo</h2>
+  <p><code>train.py</code> — trains the model and exports <code>weights.json</code> · <code>index.html</code> — this demo · <code>vercel.json</code> — security headers</p>
+</section>
+
+<footer>
+  Built by <a href="https://github.com/HVRGAMING2705">Vikranth Reddy</a> · B.Tech CSE (AI &amp; ML), Woxsen University ·
+  <a href="https://github.com/HVRGAMING2705/digitvision">GitHub repo</a>
+</footer>
+</div>
+
+<script>
+let W = null;
+const pad = document.getElementById("pad");
+const ctx = pad.getContext("2d");
+ctx.fillStyle = "#000"; ctx.fillRect(0, 0, 280, 280);
+ctx.lineCap = "round"; ctx.lineJoin = "round";
+ctx.strokeStyle = "#fff"; ctx.lineWidth = 22;
+let drawing = false, last = null;
+
+function pos(e) {
+  const r = pad.getBoundingClientRect();
+  const t = (e.touches && e.touches[0]) || e;
+  return [t.clientX - r.left, t.clientY - r.top];
+}
+pad.addEventListener("pointerdown", e => { drawing = true; last = pos(e); e.preventDefault(); });
+pad.addEventListener("pointermove", e => {
+  if (!drawing) return;
+  const p = pos(e);
+  ctx.beginPath(); ctx.moveTo(last[0], last[1]); ctx.lineTo(p[0], p[1]); ctx.stroke();
+  last = p;
+});
+window.addEventListener("pointerup", () => { drawing = false; });
+
+// Downsample the 280x280 drawing to 8x8, luminance 0..1 (matches X/16 in Python)
+function readPixels() {
+  const img = ctx.getImageData(0, 0, 280, 280).data;
+  const out = new Array(64).fill(0);
+  const block = 35; // 280/8
+  for (let gy = 0; gy < 8; gy++) for (let gx = 0; gx < 8; gx++) {
+    let sum = 0, n = 0;
+    for (let y = gy * block; y < (gy + 1) * block; y++) for (let x = gx * block; x < (gx + 1) * block; x++) {
+      const i = (y * 280 + x) * 4;
+      sum += (img[i] + img[i + 1] + img[i + 2]) / 3 / 255; n++;
+    }
+    out[gy * 8 + gx] = sum / n;
+  }
+  return out;
+}
+
+function softmax(z) {
+  const m = Math.max(...z);
+  const e = z.map(v => Math.exp(v - m));
+  const s = e.reduce((a, b) => a + b, 0);
+  return e.map(v => v / s);
+}
+
+function predict(x) {
+  const z = W.coef.map((w, k) => {
+    let s = W.intercept[k];
+    for (let i = 0; i < 64; i++) s += w[i] * x[i];
+    return s;
+  });
+  return softmax(z);
+}
+
+function renderPreview(x) {
+  const pv = document.getElementById("preview");
+  const c = pv.getContext("2d");
+  const img = c.createImageData(8, 8);
+  for (let i = 0; i < 64; i++) {
+    const v = Math.round(x[i] * 255);
+    img.data[i * 4] = v; img.data[i * 4 + 1] = v; img.data[i * 4 + 2] = v; img.data[i * 4 + 3] = 255;
+  }
+  // draw onto temp canvas at 8x8, then upscale with pixelation
+  const t = document.createElement("canvas"); t.width = 8; t.height = 8;
+  t.getContext("2d").putImageData(img, 0, 0);
+  c.imageSmoothingEnabled = false;
+  c.clearRect(0, 0, 80, 80);
+  c.drawImage(t, 0, 0, 80, 80);
+}
+
+function showResult(p) {
+  const order = p.map((v, i) => [v, i]).sort((a, b) => b[0] - a[0]);
+  document.getElementById("verdict").textContent =
+    `Prediction: ${order[0][1]}  (${(order[0][0] * 100).toFixed(1)}%)`;
+  const box = document.getElementById("probs");
+  box.innerHTML = "";
+  order.forEach(([v, d]) => {
+    const row = document.createElement("div");
+    row.className = "prow";
+    row.innerHTML = `<span class="d">${d}</span>
+      <span class="barw"><span class="fill" style="width:${(v * 100).toFixed(1)}%"></span></span>
+      <span class="p">${(v * 100).toFixed(1)}%</span>`;
+    box.appendChild(row);
+  });
+}
+
+function classify() {
+  if (!W) { alert("Model weights are still loading — try again in a second."); return; }
+  const x = readPixels();
+  renderPreview(x);
+  showResult(predict(x));
+}
+
+function loadSample(s) {
+  // render the 8x8 sample upscaled into the drawing canvas (white on black)
+  ctx.fillStyle = "#000"; ctx.fillRect(0, 0, 280, 280);
+  const t = document.createElement("canvas"); t.width = 8; t.height = 8;
+  const tc = t.getContext("2d");
+  const img = tc.createImageData(8, 8);
+  for (let i = 0; i < 64; i++) {
+    const v = Math.round(s.pixels[i] * 255);
+    img.data[i * 4] = v; img.data[i * 4 + 1] = v; img.data[i * 4 + 2] = v; img.data[i * 4 + 3] = 255;
+  }
+  tc.putImageData(img, 0, 0);
+  ctx.imageSmoothingEnabled = true; // smooth sample for a nicer stroke look
+  ctx.drawImage(t, 0, 0, 280, 280);
+  ctx.imageSmoothingEnabled = false;
+  renderPreview(s.pixels);
+  showResult(predict(s.pixels));
+}
+
+document.getElementById("go").addEventListener("click", classify);
+document.getElementById("clear").addEventListener("click", () => {
+  ctx.fillStyle = "#000"; ctx.fillRect(0, 0, 280, 280);
+  document.getElementById("verdict").textContent = "Draw a digit, then hit Classify.";
+  document.getElementById("probs").innerHTML = "";
+  const pv = document.getElementById("preview");
+  pv.getContext("2d").clearRect(0, 0, 80, 80);
+});
+
+fetch("weights.json").then(r => r.json()).then(w => {
+  W = w;
+  const sb = document.getElementById("samplebtns");
+  w.samples.forEach(s => {
+    const b = document.createElement("button");
+    b.className = "ghost"; b.textContent = s.digit;
+    b.addEventListener("click", () => loadSample(s));
+    sb.appendChild(b);
+  });
+}).catch(() => {});
+</script>
+</body>
+</html>
