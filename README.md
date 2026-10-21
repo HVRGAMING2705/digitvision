@@ -2,7 +2,7 @@
 
 ML-powered **handwritten digit classifier** — draw a digit 0–9 and a real trained model predicts it, right in the browser.
 
-**Live demo:** https://digitvision.vercel.app
+**Live demo:** https://digitvision-hvrgaming2705s-projects.vercel.app
 
 ## How it works
 

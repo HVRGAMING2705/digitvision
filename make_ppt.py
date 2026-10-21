@@ -145,7 +145,7 @@ content_slide("Live Demo", 6, [
     "    confidence bar for every digit 0–9.",
     "•  The 8×8 preview shows exactly what the model sees after downsampling.",
     "•  One-click buttons load a real labeled sample digit from the training set.",
-    "•  Demo URL: digitvision.vercel.app",
+    "•  Demo URL: digitvision-hvrgaming2705s-projects.vercel.app",
 ])
 
 # 7 — Results (with plain black grid table of fold scores)
@@ -174,7 +174,7 @@ content_slide("Future Scope", 8, [
 s = prs.slides.add_slide(blank)
 txbox(s, 1.5, 2.2, 10.3, 1.6, "Thank You", size=60, bold=True, align=PP_ALIGN.CENTER)
 txbox(s, 1.5, 4.3, 10.3, 1.5,
-      "GitHub: github.com/HVRGAMING2705/digitvision\nDemo: digitvision.vercel.app",
+      "GitHub: github.com/HVRGAMING2705/digitvision\nDemo: digitvision-hvrgaming2705s-projects.vercel.app",
       size=22, color=GREY, align=PP_ALIGN.CENTER)
 
 out = "/home/hatch/workspace/goals/daily-ai-ml-project-factory/files/AIML_DigitVision_2026-10-21.pptx"
