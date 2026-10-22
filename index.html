@@ -4,15 +4,15 @@
 <meta name="google-site-verification" content="5EchCsH88JXnn0Mc55I8joYV6mial9rsc4G8c0eg4Ls" />
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DigitVision — AI Handwritten Digit Classifier</title>
+<title>DigitVision: AI Handwritten Digit Classifier</title>
 <meta name="description" content="DigitVision is a machine-learning handwritten digit recognizer. Draw a digit 0–9 and a real softmax (logistic regression) model, trained in Python on 1,797 digit images and running fully in your browser, predicts what you drew.">
 <link rel="canonical" href="https://digitvision-hvrgaming2705s-projects.vercel.app/">
 <meta property="og:type" content="website">
-<meta property="og:title" content="DigitVision — AI Handwritten Digit Classifier">
+<meta property="og:title" content="DigitVision: AI Handwritten Digit Classifier">
 <meta property="og:description" content="Draw a digit 0–9, get an instant prediction from a real trained ML model running in your browser.">
 <meta property="og:url" content="https://digitvision-hvrgaming2705s-projects.vercel.app/">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="DigitVision — AI Handwritten Digit Classifier">
+<meta name="twitter:title" content="DigitVision: AI Handwritten Digit Classifier">
 <meta name="twitter:description" content="Real softmax digit classifier (97% CV accuracy), running 100% in the browser.">
 <meta name="robots" content="index, follow">
 <script type="application/ld+json">
@@ -56,20 +56,17 @@
            color:var(--muted); font-size:.9rem; }
   a { color:var(--ink); }
 </style>
-<meta property="og:image" content="https://digitvision-hvrgaming2705s-projects.vercel.app/og.png">
-<meta name="twitter:image" content="https://digitvision-hvrgaming2705s-projects.vercel.app/og.png">
-<link rel="icon" type="image/svg+xml" href="/favicon.svg">
 </head>
 <body>
 <div class="wrap">
 <header>
-  <h1>DigitVision ✍️</h1>
-  <p class="tag">AI handwritten digit classifier — by Vikranth Reddy</p>
+  <h1>DigitVision</h1>
+  <p class="tag">AI handwritten digit classifier, by Vikranth Reddy</p>
 </header>
 
 <section class="card">
   <h2 style="margin-top:0">Try the live model</h2>
-  <p>Draw a digit (0–9) in the box. A real <b>softmax (multinomial logistic regression)</b> model — trained in Python on 1,797 digit images, exported as weights, running 100% in your browser — predicts what you drew.</p>
+  <p>Draw a digit (0–9) in the box. A real <b>softmax (multinomial logistic regression)</b> model, trained in Python on 1,797 digit images, exported as weights, running 100% in your browser, predicts what you drew.</p>
   <div class="demorow">
     <div>
       <canvas id="pad" width="280" height="280"></canvas>
@@ -94,20 +91,19 @@
   <h2>How it works</h2>
   <div class="grid">
     <div class="card"><b>1. Data</b><br>1,797 handwritten 8×8 grayscale digit images (0–9), pixel values scaled to 0–1.</div>
-    <div class="card"><b>2. Model</b><br>Softmax regression (multinomial logistic regression, scikit-learn). It learns one 64-pixel weight map per digit plus a bias — the weights literally look like the digits. 5-fold CV accuracy: <b>97.0%</b>.</div>
+    <div class="card"><b>2. Model</b><br>Softmax regression (multinomial logistic regression, scikit-learn). It learns one 64-pixel weight map per digit plus a bias. The weights literally look like the digits. 5-fold CV accuracy: <b>97.0%</b>.</div>
     <div class="card"><b>3. Browser</b><br><code>weights.json</code> (10 weight vectors + 10 biases + sample digits) is shipped to the site; JavaScript downsamples your drawing to 8×8 and re-runs the exact same softmax math as sklearn's <code>predict_proba</code>.</div>
-    <div class="card"><b>4. Explainable</b><br>The prediction is just a weighted vote of pixels — no black box. Draw messily and watch the probability spread.</div>
+    <div class="card"><b>4. Explainable</b><br>The prediction is just a weighted vote of pixels: no black box. Draw messily and watch the probability spread.</div>
   </div>
   <h2>Tech stack</h2>
   <p>Python · scikit-learn · NumPy · vanilla JavaScript (canvas) · static hosting (Vercel)</p>
   <h2>Files in this repo</h2>
-  <p><code>train.py</code> — trains the model and exports <code>weights.json</code> · <code>index.html</code> — this demo · <code>vercel.json</code> — security headers</p>
+  <p><code>train.py</code>: trains the model and exports <code>weights.json</code> · <code>index.html</code>: this demo · <code>vercel.json</code>: security headers</p>
 </section>
 
 <footer>
   Built by <a href="https://github.com/HVRGAMING2705">Vikranth Reddy</a> · B.Tech CSE (AI &amp; ML), Woxsen University ·
   <a href="https://github.com/HVRGAMING2705/digitvision">GitHub repo</a>
-<span class="fleet-legal" style="display:block;text-align:center;padding:10px 0;font-size:13px"><a href="/legal.html">Privacy · Terms</a></span>
 </footer>
 </div>
 
@@ -199,7 +195,7 @@ function showResult(p) {
 }
 
 function classify() {
-  if (!W) { alert("Model weights are still loading — try again in a second."); return; }
+  if (!W) { alert("Model weights are still loading, try again in a second."); return; }
   const x = readPixels();
   renderPreview(x);
   showResult(predict(x));
@@ -243,6 +239,5 @@ fetch("weights.json").then(r => r.json()).then(w => {
   });
 }).catch(() => {});
 </script>
-<script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
